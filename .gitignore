@@ -34,3 +34,7 @@ frontend/vite.config.d.ts
 .idea/
 *.swp
 .DS_Store
+
+# Windows build artefacts
+release/
+installer/Output/

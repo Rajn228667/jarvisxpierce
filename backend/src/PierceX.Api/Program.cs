@@ -103,8 +103,38 @@ app.UseCors("client");
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Serve bundled SPA from ./wwwroot when present (desktop/single-exe deployment)
+var wwwroot = Path.Combine(app.Environment.ContentRootPath, "wwwroot");
+var hasSpa = Directory.Exists(wwwroot) && File.Exists(Path.Combine(wwwroot, "index.html"));
+if (hasSpa)
+{
+    app.UseDefaultFiles();
+    app.UseStaticFiles();
+}
+
 app.MapControllers();
-app.MapGet("/", () => Results.Ok(new { name = "Pierce X Hail Mery API", status = "ok", docs = "/swagger", version = "1.0" }));
 app.MapGet("/health", () => Results.Ok(new { status = "healthy", time = DateTime.UtcNow }));
+
+if (hasSpa)
+{
+    // SPA fallback: any non-API, non-swagger GET returns index.html
+    app.MapFallback(async ctx =>
+    {
+        var path = ctx.Request.Path.Value ?? "/";
+        if (path.StartsWith("/api", StringComparison.OrdinalIgnoreCase) ||
+            path.StartsWith("/swagger", StringComparison.OrdinalIgnoreCase) ||
+            path.StartsWith("/health", StringComparison.OrdinalIgnoreCase))
+        {
+            ctx.Response.StatusCode = StatusCodes.Status404NotFound;
+            return;
+        }
+        ctx.Response.ContentType = "text/html; charset=utf-8";
+        await ctx.Response.SendFileAsync(Path.Combine(wwwroot, "index.html"));
+    });
+}
+else
+{
+    app.MapGet("/", () => Results.Ok(new { name = "Pierce X Hail Mery API", status = "ok", docs = "/swagger", version = "1.0" }));
+}
 
 app.Run();

@@ -64,6 +64,28 @@ Seed создаёт: 60 студентов, 8 преподавателей, ко
 
 ---
 
+## 🪟 Windows — сборка EXE и инсталлера
+
+Для демо на хакатоне: один self-contained `PierceX.Api.exe` + bundled SPA + инсталлер `PierceX-Setup.exe`.
+
+```cmd
+winget install Microsoft.DotNet.SDK.8
+winget install OpenJS.NodeJS.LTS
+winget install JRSoftware.InnoSetup
+git clone https://github.com/Rajn228667/jarvisxpierce.git pierce-x-hail-mery
+cd pierce-x-hail-mery
+build.bat
+iscc installer\PierceX.iss
+```
+
+Результат:
+- `release\PierceX.Api.exe` — бэкенд + SPA, запуск двойным кликом → открывается http://localhost:5080/
+- `installer\Output\PierceX-Setup.exe` — инсталлер для раздачи (ярлык в меню Пуск, опция автозапуска)
+
+Подробности: [installer/README.md](installer/README.md)
+
+---
+
 ## 🧑‍💻 Локальная разработка (без Docker)
 
 ### Backend
