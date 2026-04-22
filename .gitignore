@@ -12,7 +12,11 @@
 **/node_modules/
 **/dist/
 **/.vite/
-frontend/tsconfig*.tsbuildinfo
+**/*.tsbuildinfo
+# Generated JS/d.ts (source is TypeScript)
+frontend/src/**/*.js
+frontend/src/**/*.d.ts
+!frontend/src/vite-env.d.ts
 frontend/vite.config.js
 frontend/vite.config.d.ts
 
