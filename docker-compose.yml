@@ -1,0 +1,60 @@
+version: "3.9"
+
+services:
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
+    container_name: pxhm-mailhog
+    ports:
+      - "1025:1025"   # SMTP
+      - "8025:8025"   # Web UI
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: .
+      dockerfile: docker/backend.Dockerfile
+    container_name: pxhm-backend
+    depends_on:
+      - mailhog
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: "http://+:8080"
+      Database__Provider: "sqlite"
+      ConnectionStrings__Default: "Data Source=/data/piercex.db"
+      Jwt__Issuer: "PierceX"
+      Jwt__Audience: "PierceX.Clients"
+      Jwt__Secret: "${JWT_SECRET:-change-me-in-production-0a4bd3-8f97-43c1-aaaa-pierce-x-hail-mery}"
+      Jwt__AccessTokenMinutes: "120"
+      Jwt__RefreshTokenDays: "30"
+      Smtp__Host: "mailhog"
+      Smtp__Port: "1025"
+      Smtp__UseSsl: "false"
+      Smtp__FromEmail: "no-reply@piercex.local"
+      Smtp__FromName: "Pierce X Hail Mery"
+      Groq__ApiKey: "${GROQ_API_KEY:-}"
+      Groq__Model: "llama-3.3-70b-versatile"
+      Groq__BaseUrl: "https://api.groq.com/openai/v1"
+      Cors__Origins__0: "http://localhost:5173"
+      Cors__Origins__1: "http://localhost:8080"
+      Cors__Origins__2: "http://localhost"
+    volumes:
+      - backend-data:/data
+    ports:
+      - "5080:8080"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/frontend.Dockerfile
+      args:
+        VITE_API_BASE: "/api"
+    container_name: pxhm-frontend
+    depends_on:
+      - backend
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+
+volumes:
+  backend-data:

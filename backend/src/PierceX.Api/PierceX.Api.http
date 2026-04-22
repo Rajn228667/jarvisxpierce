@@ -1,0 +1,6 @@
+@PierceX.Api_HostAddress = http://localhost:5199
+
+GET {{PierceX.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
